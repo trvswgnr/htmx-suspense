@@ -22,7 +22,6 @@ export default function Posts() {
     }} />
 }
 
-
 type Post = {
     userId: number;
     id: number;
