@@ -2,7 +2,7 @@
 
 import { renderToReadableStream } from "react-dom/server";
 import fs from "fs";
-import Home from "./Home";
+import Home from "./HomeComponent";
 
 clean();
 serve();
