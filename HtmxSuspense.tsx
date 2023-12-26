@@ -35,8 +35,7 @@ export default function HtmxSuspense({ server, client, children }: { server: Ser
                 id={`htmx-suspense-${hash}`}
                 hx-trigger="load"
                 hx-get={route}
-                hx-swap="outerHTML"
-                hx-on={`htmx:afterSettle: ${scriptLoader}`}
+                hx-on--after-request={`${scriptLoader}`}
             >
                 <div className="htmx-suspense-fallback">{children ?? "Loading..."}</div>
             </div>
