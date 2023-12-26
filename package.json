@@ -3,15 +3,18 @@
   "module": "index.ts",
   "type": "module",
   "scripts": {
-    "serve": "bun run --watch serve.ts"
+    "serve": "bun run --watch serve.ts",
+    "seed": "bun run seed.ts"
+  },
+  "dependencies": {
+    "jsx-runtime": "^1.2.0",
+    "react-dom": "^18.2.0",
+    "zod": "^3.22.4"
   },
   "devDependencies": {
     "@types/react": "^18.2.45",
     "@types/react-dom": "^18.2.18",
-    "bun-types": "latest",
-    "jsx-runtime": "^1.2.0",
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0"
+    "bun-types": "latest"
   },
   "peerDependencies": {
     "typescript": "^5.0.0"
