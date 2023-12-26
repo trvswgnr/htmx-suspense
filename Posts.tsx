@@ -1,7 +1,7 @@
 /// <reference lib="dom" />
 
-import HtmxSuspense from "./htmx-suspense";
-import { z } from "zod";
+import HtmxSuspense from "./HtmxSuspense";
+import { type z } from "zod";
 
 export default function Posts() {
     return (
@@ -15,6 +15,7 @@ export default function Posts() {
 }
 
 const serverAction = async () => {
+    console.log("hello from server");
     const { Database } = await import("bun:sqlite");
     const { z } = await import("zod");
     const db = Database.open("db.sqlite");

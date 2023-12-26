@@ -1,8 +1,8 @@
 /// <reference types="bun-types" />
 
-import Home from "./home";
 import { renderToReadableStream } from "react-dom/server";
 import fs from "fs";
+import Home from "./Home";
 
 clean();
 serve();

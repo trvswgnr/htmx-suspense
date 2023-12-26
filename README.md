@@ -1,4 +1,4 @@
-# htmx-suspense
+# htmx server components
 
 To install dependencies:
 
@@ -6,10 +6,16 @@ To install dependencies:
 bun install
 ```
 
-To run:
+To run this example:
+
+Seed the database:
 
 ```bash
-bun run index.ts
+bun run seed
 ```
 
-This project was created using `bun init` in bun v1.0.15. [Bun](https://bun.sh) is a fast all-in-one JavaScript runtime.
+Then run the server:
+
+```bash
+bun run serve
+```
