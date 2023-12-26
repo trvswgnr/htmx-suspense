@@ -26,6 +26,7 @@ export default function HtmxSuspense({ server, client, children }: { server: Ser
             const id = "htmx-suspense-script-${hash}";
             if (!document.getElementById(id)) {
                 const script = document.createElement("script");
+                script.id = id;
                 script.src = "${route}";
                 document.head.appendChild(script);
             }
