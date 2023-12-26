@@ -1,43 +1,66 @@
+/// <reference types="bun-types" />
+
 import Home from "./home";
 import { renderToReadableStream } from "react-dom/server";
 import fs from "fs";
 
-// remove all files from the htmx folder
-const files = fs.readdirSync('./htmx');
-for (const file of files) {
-    fs.unlinkSync(`./htmx/${file}`);
+clean();
+serve();
+
+function serve() {
+    const server = Bun.serve({
+        port: 3000,
+        async fetch(req) {
+            const url = new URL(req.url);
+            const pathname = url.pathname;
+            if (pathname === '/') {
+                const stream = await renderToReadableStream(Home());
+                return new Response(stream, {
+                    headers: {
+                        'Content-Type': 'text/html',
+                    },
+                });
+            }
+            if (pathname.startsWith('/generated/server')) {
+                const fn: CallableFunction = await import(`.${pathname}`)
+                    .then(m => m.default)
+                    .catch((e: unknown) => () => errorMessage(e));
+                const data = await fn().catch((e: unknown) => errorMessage(e));
+                const stream = await renderToReadableStream(data);
+                return new Response(stream, {
+                    headers: {
+                        'Content-Type': 'text/html',
+                    },
+                });
+            }
+            const file = Bun.file(`.${pathname}`);
+            const exists = await file.exists();
+            if (exists) {
+                return new Response(file);
+            }
+            return new Response('Not Found', { status: 404 });
+        },
+    });
+
+    console.log(`Server started at ${server.url}`);
+
+    return server;
 }
 
-Bun.serve({
-    port: 3000,
-    async fetch(req) {
-        const url = new URL(req.url);
-        const pathname = url.pathname;
-        if (pathname === '/') {
-            const stream = await renderToReadableStream(Home());
-            return new Response(stream, {
-                headers: {
-                    'Content-Type': 'text/html',
-                },
-            });
-        }
-        if (pathname.startsWith('/htmx')) {
-            const fn: CallableFunction = await import(`.${pathname}`)
-                .then(m => m.default)
-                .catch((e) => () => errorMessage(e));
-            const data = await fn().catch((e: any) => errorMessage(e.message));
-            const stream = await renderToReadableStream(data);
-            return new Response(stream, {
-                headers: {
-                    'Content-Type': 'text/html',
-                },
-            });
-        }
-        return new Response('Not Found', { status: 404 });
-    },
-});
+function clean() {
+    const htmlFiles = fs.readdirSync('./generated/server');
+    for (const file of htmlFiles) {
+        if (file === ".gitignore") continue;
+        fs.unlinkSync(`./generated/server/${file}`);
+    }
+    const jsFiles = fs.readdirSync('./generated/client');
+    for (const file of jsFiles) {
+        if (file === ".gitignore") continue;
+        fs.unlinkSync(`./generated/client/${file}`);
+    }
+}
 
-const errorMessage = (message?: string) => `Error: ${message ?? "Unknown error"}`;
-
-console.log("Server started at http://localhost:3000");
-
+function errorMessage(err?: unknown) {
+    const error = err instanceof Error ? err : new Error("Unknown error");
+    return `${error.name}: ${error.message}`;
+}
