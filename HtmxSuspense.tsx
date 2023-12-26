@@ -3,13 +3,12 @@ import fs from 'fs';
 export default function HtmxSuspense({ server, client, children }: { server: ServerFunction; client?: ClientFunction; children?: React.ReactNode }) {
     let serverFn = server;
     let script: () => React.ReactNode = () => null;
-    let clientRoute = "";
     let clientVars = "";
     if (client) {
         const fnString = client.toString();
         const content = `(${fnString})(document);`;
         const hash = Bun.hash(fnString).toString(36);
-        clientRoute = `/generated/client/${hash}.js`;
+        const clientRoute = `/generated/client/${hash}.js`;
         const filepath = `.${clientRoute}`;
         if (!fs.existsSync(filepath)) {
             fs.writeFileSync(filepath, content);
@@ -26,7 +25,7 @@ export default function HtmxSuspense({ server, client, children }: { server: Ser
         clientVars = `
             const server = ${server.toString()};
             const script = ${script.toString()};
-            const clientRoute = ${clientRoute ? JSON.stringify(clientRoute) : "null"};
+            const clientRoute = ${JSON.stringify(clientRoute)};
         `;
     }
     const fnString = serverFn.toString();
@@ -41,19 +40,16 @@ export default function HtmxSuspense({ server, client, children }: { server: Ser
     if (!fs.existsSync(filepath)) {
         fs.writeFileSync(filepath, content);
     }
-
     return (
-        <>
-            <div
-                className="htmx-suspense"
-                id={`htmx-suspense-${hash}`}
-                hx-trigger="load"
-                hx-get={route}
-                hx-swap="outerHTML"
-            >
-                {children ?? "Loading..."}
-            </div>
-        </>
+        <div
+            className="htmx-suspense"
+            id={`htmx-suspense-${hash}`}
+            hx-trigger="load"
+            hx-get={route}
+            hx-swap="outerHTML"
+        >
+            {children ?? "Loading..."}
+        </div>
     );
 }
 
