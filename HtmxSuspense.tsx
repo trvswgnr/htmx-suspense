@@ -6,7 +6,7 @@ export default function HtmxSuspense({ server, client, children }: { server: Ser
     let clientVars = "";
     if (client) {
         const fnString = client.toString();
-        const content = `(${fnString})(document);`;
+        const content = `(${fnString})();`;
         const hash = Bun.hash(fnString).toString(36);
         const clientRoute = `/generated/client/${hash}.js`;
         const filepath = `.${clientRoute}`;
