@@ -23,9 +23,12 @@ export default function HtmxSuspense({ server, client, children }: { server: Ser
             fs.writeFileSync(filepath, content);
         }
         scriptLoader = `
-            const script = document.createElement("script");
-            script.src = "${route}";
-            document.head.appendChild(script);
+            const id = "htmx-suspense-script-${hash}";
+            if (!document.getElementById(id)) {
+                const script = document.createElement("script");
+                script.src = "${route}";
+                document.head.appendChild(script);
+            }
         `;
     }
     return (
