@@ -1,7 +1,7 @@
 /// <reference lib="dom" />
 
 import HtmxSuspense from "./HtmxSuspense";
-import { type z } from "zod";
+import { type z } from "zod"; // just for the type
 
 export default function Posts() {
     return (
