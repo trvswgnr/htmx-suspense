@@ -4,7 +4,7 @@ export default function Home() {
         <html>
             <head>
                 <title>htmx-suspense</title>
-                <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+                <script src="https://unpkg.com/htmx.org@1.9.10/dist/htmx.min.js"></script>
                 <link rel="stylesheet" href="/public/style.css" />
             </head>
             <body>
