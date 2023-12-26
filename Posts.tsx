@@ -27,12 +27,14 @@ const serverAction = async () => {
     });
     type Post = z.infer<typeof Post>;
     const rows = db.prepare("SELECT * FROM posts").all().map((row) => Post.parse(row));
-    return <div className="posts">
-        {rows.map((post) => <div className="post" key={post.id}>
-            <h2 className="post-title">{post.title}</h2>
-            <p className="post-body">{post.body}</p>
-        </div>)}
-    </div>;
+    return (
+        <div className="posts">
+            {rows.map((post) => <div className="post" key={post.id}>
+                <h2 className="post-title">{post.title}</h2>
+                <p className="post-body">{post.body}</p>
+            </div>)}
+        </div>
+    );
 };
 
 const clientAction = (document: Document) => {

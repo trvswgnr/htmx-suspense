@@ -1,9 +1,38 @@
 import fs from 'fs';
 
 export default function HtmxSuspense({ server, client, children }: { server: ServerFunction; client?: ClientFunction; children?: React.ReactNode }) {
-    const fnString = server.toString();
+    let serverFn = server;
+    let script: () => React.ReactNode = () => null;
+    let clientRoute = "";
+    let clientVars = "";
+    if (client) {
+        const fnString = client.toString();
+        const content = `(${fnString})(document);`;
+        const hash = Bun.hash(fnString).toString(36);
+        clientRoute = `/generated/client/${hash}.js`;
+        const filepath = `.${clientRoute}`;
+        if (!fs.existsSync(filepath)) {
+            fs.writeFileSync(filepath, content);
+        }
+        script = () => <script src={clientRoute} />;
+        serverFn = async () => {
+            return (
+                <>
+                    {await server()}
+                    {script()}
+                </>
+            );
+        }
+        clientVars = `
+            const server = ${server.toString()};
+            const script = ${script.toString()};
+            const clientRoute = ${clientRoute ? JSON.stringify(clientRoute) : "null"};
+        `;
+    }
+    const fnString = serverFn.toString();
     const content = `
-        const jsxDEV = await import('react/jsx-dev-runtime').then((m) => m.jsxDEV);
+        const { jsxDEV, Fragment } = await import('react/jsx-dev-runtime');
+        ${clientVars}
         export default ${fnString};
     `;
     const hash = Bun.hash(fnString).toString(36);
@@ -12,26 +41,7 @@ export default function HtmxSuspense({ server, client, children }: { server: Ser
     if (!fs.existsSync(filepath)) {
         fs.writeFileSync(filepath, content);
     }
-    let scriptLoader = null;
-    if (client) {
-        const fnString = client.toString();
-        const content = `(${fnString})(document);`;
-        const hash = Bun.hash(fnString).toString(36);
-        const route = `/generated/client/${hash}.js`;
-        const filepath = `.${route}`;
-        if (!fs.existsSync(filepath)) {
-            fs.writeFileSync(filepath, content);
-        }
-        scriptLoader = `
-            const id = "htmx-suspense-script-${hash}";
-            if (!document.getElementById(id)) {
-                const script = document.createElement("script");
-                script.id = id;
-                script.src = "${route}";
-                document.head.appendChild(script);
-            }
-        `;
-    }
+
     return (
         <>
             <div
@@ -39,9 +49,9 @@ export default function HtmxSuspense({ server, client, children }: { server: Ser
                 id={`htmx-suspense-${hash}`}
                 hx-trigger="load"
                 hx-get={route}
-                hx-on--after-request={`${scriptLoader}`}
+                hx-swap="outerHTML"
             >
-                <div className="htmx-suspense-fallback">{children ?? "Loading..."}</div>
+                {children ?? "Loading..."}
             </div>
         </>
     );
