@@ -12,7 +12,7 @@ export default function HtmxSuspense({ server, client, children }: { server: Ser
     if (!fs.existsSync(filepath)) {
         fs.writeFileSync(filepath, content);
     }
-    let script = null;
+    let scriptLoader = null;
     if (client) {
         const fnString = client.toString();
         const content = `(${fnString})(document);`;
@@ -22,7 +22,11 @@ export default function HtmxSuspense({ server, client, children }: { server: Ser
         if (!fs.existsSync(filepath)) {
             fs.writeFileSync(filepath, content);
         }
-        script = <script src={route} />;
+        scriptLoader = `
+            const script = document.createElement("script");
+            script.src = "${route}";
+            document.head.appendChild(script);
+        `;
     }
     return (
         <>
@@ -32,10 +36,10 @@ export default function HtmxSuspense({ server, client, children }: { server: Ser
                 hx-trigger="load"
                 hx-get={route}
                 hx-swap="outerHTML"
+                hx-on={`htmx:afterSettle: ${scriptLoader}`}
             >
                 <div className="htmx-suspense-fallback">{children ?? "Loading..."}</div>
             </div>
-            {script}
         </>
     );
 }
