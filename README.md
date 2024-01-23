@@ -1,4 +1,4 @@
-# htmx server components
+# htmx suspense
 
 To install dependencies:
 
